@@ -416,11 +416,41 @@ async function payOnline() {
             description: "Fruit Order",
             order_id: order.id,
 
-            handler: function (response) {
-                alert("Payment successful!");
-                console.log(response);
-            },
+            handler: async function (payment) {
 
+    try {
+        const verifyResponse = await fetch(
+            "https://mb-brothers-fruits-shop.onrender.com/verify-payment",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    razorpay_order_id: payment.razorpay_order_id,
+                    razorpay_payment_id: payment.razorpay_payment_id,
+                    razorpay_signature: payment.razorpay_signature
+                })
+            }
+        );
+
+        const result = await verifyResponse.json();
+
+        if (result.success) {
+            alert("Payment successful and verified! ✅");
+
+            // After payment verification, open WhatsApp order
+            checkout();
+
+        } else {
+            alert("Payment verification failed.");
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert("Payment verification failed.");
+    }
+},
             theme: {
                 color: "#2e7d32"
             }
