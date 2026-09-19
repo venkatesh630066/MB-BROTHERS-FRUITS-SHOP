@@ -1,9 +1,11 @@
 let cart = [];
 
+// ================================
 // ADD TO CART
+// ================================
 function addToCart(name, price) {
 
-    let existingItem = cart.find(item => item.name === name);
+    const existingItem = cart.find(item => item.name === name);
 
     if (existingItem) {
         existingItem.quantity++;
@@ -15,48 +17,56 @@ function addToCart(name, price) {
         });
     }
 
-    displayCart();
+    updateCart();
 }
 
 
-// DISPLAY CART
-function displayCart() {
+// ================================
+// UPDATE CART
+// ================================
+function updateCart() {
 
-    const cartItems = document.getElementById("cart-items");
-    const cartTotal = document.getElementById("cart-total");
+    const cartContainer =
+        document.getElementById("cartItems") ||
+        document.getElementById("cart-items");
+
+    const cartTotal =
+        document.getElementById("cartTotal") ||
+        document.getElementById("cart-total");
+
+    if (!cartContainer) return;
 
     if (cart.length === 0) {
-        cartItems.innerHTML = "<p>Your cart is empty. 🍎</p>";
-        cartTotal.innerHTML = "Total: ₹0";
+
+        cartContainer.innerHTML =
+            "<p>Your cart is empty. 🍎</p>";
+
+        if (cartTotal) {
+            cartTotal.textContent = "₹0";
+        }
+
         return;
     }
 
     let total = 0;
+
     let html = "";
 
     cart.forEach((item, index) => {
 
-        let itemTotal = item.price * item.quantity;
+        const itemTotal =
+            item.price * item.quantity;
 
         total += itemTotal;
 
         html += `
-            <div style="
-                display:flex;
-                align-items:center;
-                justify-content:space-between;
-                gap:10px;
-                padding:15px;
-                margin-bottom:10px;
-                border-bottom:1px solid #ddd;
-                flex-wrap:wrap;
-            ">
+            <div class="cart-item">
 
-                <strong>${item.name}</strong>
+                <h3>${item.name}</h3>
 
-                <span>
-                    ₹${item.price}
-                </span>
+                <p>
+                    ₹${item.price} × ${item.quantity}
+                </p>
 
                 <button onclick="decreaseQuantity(${index})">
                     −
@@ -75,29 +85,35 @@ function displayCart() {
                 </strong>
 
                 <button onclick="removeFromCart(${index})">
-                    Remove
+                    ❌ Remove
                 </button>
 
             </div>
         `;
     });
 
-    cartItems.innerHTML = html;
+    cartContainer.innerHTML = html;
 
-    cartTotal.innerHTML = "Total: ₹" + total;
+    if (cartTotal) {
+        cartTotal.textContent = "₹" + total;
+    }
 }
 
 
+// ================================
 // INCREASE QUANTITY
+// ================================
 function increaseQuantity(index) {
 
     cart[index].quantity++;
 
-    displayCart();
+    updateCart();
 }
 
 
+// ================================
 // DECREASE QUANTITY
+// ================================
 function decreaseQuantity(index) {
 
     if (cart[index].quantity > 1) {
@@ -107,27 +123,35 @@ function decreaseQuantity(index) {
     } else {
 
         cart.splice(index, 1);
-
     }
 
-    displayCart();
+    updateCart();
 }
 
 
+// ================================
 // REMOVE ITEM
+// ================================
 function removeFromCart(index) {
 
     cart.splice(index, 1);
 
-    displayCart();
+    updateCart();
 }
 
 
+// ================================
 // SEARCH FRUITS
+// ================================
 function searchFruits() {
 
     const searchInput =
-        document.getElementById("searchInput").value.toLowerCase();
+        document.getElementById("searchInput");
+
+    if (!searchInput) return;
+
+    const searchText =
+        searchInput.value.toLowerCase();
 
     const fruitCards =
         document.querySelectorAll(".fruit-card");
@@ -135,54 +159,84 @@ function searchFruits() {
     fruitCards.forEach(card => {
 
         const fruitName =
-            card.getAttribute("data-name");
+            (card.getAttribute("data-name") || "")
+            .toLowerCase();
 
-        if (fruitName.includes(searchInput)) {
+        if (fruitName.includes(searchText)) {
 
             card.style.display = "block";
 
         } else {
 
             card.style.display = "none";
-
         }
-
     });
 }
 
 
-function placeOrder() {
+// ================================
+// WHATSAPP CHECKOUT
+// ================================
+function checkout() {
 
     if (cart.length === 0) {
+
         alert("Your cart is empty! 🍎");
+
+        return;
+    }
+
+    const nameElement =
+        document.getElementById("customer-name");
+
+    const phoneElement =
+        document.getElementById("customer-phone");
+
+    const addressElement =
+        document.getElementById("customer-address");
+
+    if (!nameElement || !phoneElement || !addressElement) {
+
+        alert("Delivery details fields are missing.");
+
         return;
     }
 
     const name =
-        document.getElementById("customer-name").value.trim();
+        nameElement.value.trim();
 
     const phone =
-        document.getElementById("customer-phone").value.trim();
+        phoneElement.value.trim();
 
     const address =
-        document.getElementById("customer-address").value.trim();
+        addressElement.value.trim();
+
 
     if (name === "" || phone === "" || address === "") {
+
         alert("Please enter all delivery details.");
+
         return;
     }
+
 
     if (phone.length !== 10 || isNaN(phone)) {
+
         alert("Please enter a valid 10-digit mobile number.");
+
         return;
     }
 
+
     let total = 0;
+
     let orderDetails = "";
+
 
     cart.forEach(item => {
 
-        let itemTotal = item.price * item.quantity;
+        const itemTotal =
+            item.price * item.quantity;
 
         total += itemTotal;
 
@@ -195,21 +249,21 @@ function placeOrder() {
             "\n";
     });
 
-    /*
-      IMPORTANT:
-      Replace this number with your shop WhatsApp number.
-      Include country code 91.
-      Example: 919876543210
-    */
 
-    const shopWhatsAppNumber = "916300665953";
+    const shopWhatsAppNumber =
+        "919963913982";
+
 
     const message =
         "🍎 MB BROTHERS FRUITS SHOP - NEW ORDER\n\n" +
 
-        "👤 Customer Name: " + name + "\n" +
+        "👤 Customer Name: " +
+        name +
+        "\n" +
 
-        "📱 Customer Mobile: " + phone + "\n\n" +
+        "📱 Customer Mobile: " +
+        phone +
+        "\n\n" +
 
         "🍊 ORDER DETAILS\n" +
         "--------------------\n" +
@@ -218,12 +272,16 @@ function placeOrder() {
 
         "--------------------\n" +
 
-        "💰 TOTAL: ₹" + total + "\n\n" +
+        "💰 TOTAL: ₹" +
+        total +
+        "\n\n" +
 
         "📍 DELIVERY ADDRESS\n" +
-        address + "\n\n" +
+        address +
+        "\n\n" +
 
         "Thank you! 🙏";
+
 
     const whatsappURL =
         "https://wa.me/" +
@@ -231,237 +289,195 @@ function placeOrder() {
         "?text=" +
         encodeURIComponent(message);
 
+
     window.open(whatsappURL, "_blank");
-
 }
 
-// CART SYSTEM
 
-function addToCart(name, price) {
-    const existingItem = cart.find(item => item.name === name);
-
-    if (existingItem) {
-        existingItem.quantity++;
-    } else {
-        cart.push({
-            name: name,
-            price: price,
-            quantity: 1
-        });
-    }
-
-    updateCart();
-    alert(name + " added to cart!");
-}
-
-function updateCart() {
-    const cartContainer = document.getElementById("cartItems");
-    const cartTotal = document.getElementById("cartTotal");
-
-    if (!cartContainer) return;
-
-    cartContainer.innerHTML = "";
-
-    let total = 0;
-
-    cart.forEach((item, index) => {
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-
-        cartContainer.innerHTML += `
-            <div class="cart-item">
-                <h3>${item.name}</h3>
-                <p>₹${item.price} × ${item.quantity}</p>
-
-                <button onclick="decreaseQuantity(${index})">−</button>
-                <span>${item.quantity}</span>
-                <button onclick="increaseQuantity(${index})">+</button>
-
-                <button onclick="removeFromCart(${index})">
-                    ❌ Remove
-                </button>
-
-                <strong>₹${itemTotal}</strong>
-            </div>
-        `;
-    });
-
-    if (cartTotal) {
-        cartTotal.textContent = "₹" + total;
-    }
-}
-
-function increaseQuantity(index) {
-    cart[index].quantity++;
-    updateCart();
-}
-
-function decreaseQuantity(index) {
-    if (cart[index].quantity > 1) {
-        cart[index].quantity--;
-    } else {
-        cart.splice(index, 1);
-    }
-
-    updateCart();
-}
-
-function removeFromCart(index) {
-    cart.splice(index, 1);
-    updateCart();
-}
-
-function checkout() {
+// ================================
+// ONLINE PAYMENT - RAZORPAY
+// ================================
+async function payOnline() {
 
     if (cart.length === 0) {
-        alert("Your cart is empty!");
-        return;
-    }
-    function showOrderSuccess() {
-    alert("🎉 Order Placed Successfully!\n\nThank you for shopping with MB Brothers Fruits Shop ❤️");
-}
 
-    const name = document.getElementById("customer-name").value.trim();
-    const phone = document.getElementById("customer-phone").value.trim();
-    const address = document.getElementById("customer-address").value.trim();
+        alert("Please add fruits to cart first.");
 
-    if (name === "" || phone === "" || address === "") {
-        alert("Please enter your delivery details.");
         return;
     }
 
-    if (phone.length !== 10 || isNaN(phone)) {
-        alert("Please enter a valid 10-digit mobile number.");
+
+    const cartTotalElement =
+        document.getElementById("cartTotal") ||
+        document.getElementById("cart-total");
+
+
+    if (!cartTotalElement) {
+
+        alert("Cart total not found.");
+
         return;
     }
 
-    let message = "";
-    
-    message += "================================%0A";
-    message += "       MB BROTHERS FRUITS SHOP%0A";
-    message += "================================%0A%0A";
 
-    message += "             NEW ORDER%0A";
-    message += "--------------------------------%0A";
+    const totalText =
+        cartTotalElement.innerText;
 
-    let total = 0;
 
-    cart.forEach(item => {
+    const amount =
+        Number(
+            totalText.replace(/[^\d.]/g, "")
+        );
 
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-
-        message += item.name +
-                   " x " +
-                   item.quantity +
-                   " = Rs." +
-                   itemTotal +
-                   "%0A";
-    });
-
-    message += "--------------------------------%0A";
-    message += "TOTAL: Rs." + total + "%0A";
-    message += "================================%0A%0A";
-
-    message += "CUSTOMER DETAILS%0A";
-    message += "--------------------------------%0A";
-    message += "Name    : " + name + "%0A";
-    message += "Mobile  : " + phone + "%0A";
-    message += "Address : " + address + "%0A%0A";
-
-    message += "Please confirm my order.%0A%0A";
-    message += "Thank you for choosing MB Brothers Fruits Shop!";
-
-    const phoneNumber = "919963913982";
-
-    const whatsappURL =
-        "https://wa.me/" +
-        phoneNumber +
-        "?text=" +
-        message;
-
-    window.open(whatsappURL, "_blank");
-    showOrderSuccess();
-
-}
-async function payOnline() {
-    const totalText = document.getElementById("cartTotal").innerText;
-    const amount = Number(totalText.replace(/[^\d.]/g, ""));
 
     if (!amount || amount <= 0) {
+
         alert("Please add fruits to cart first.");
+
         return;
     }
 
-    try {
-        const response = await fetch("https://mb-brothers-fruits-shop.onrender.com/create-order", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ amount: amount })
-        });
-
-        const order = await response.json();
-
-        if (!response.ok) {
-            throw new Error(order.error || "Unable to create order");
-        }
-
-        const options = {
-            key: "rzp_live_TcLxFzDGHkbDsF",
-            amount: order.amount,
-            currency: "INR",
-            name: "MB Brothers Fruits Shop",
-            description: "Fruit Order",
-            order_id: order.id,
-
-            handler: async function (payment) {
 
     try {
-        const verifyResponse = await fetch(
-            "https://mb-brothers-fruits-shop.onrender.com/verify-payment",
+
+        // CREATE RAZORPAY ORDER
+        const response = await fetch(
+            "https://mb-brothers-fruits-shop.onrender.com/create-order",
             {
                 method: "POST",
+
                 headers: {
                     "Content-Type": "application/json"
                 },
+
                 body: JSON.stringify({
-                    razorpay_order_id: payment.razorpay_order_id,
-                    razorpay_payment_id: payment.razorpay_payment_id,
-                    razorpay_signature: payment.razorpay_signature
+                    amount: amount
                 })
             }
         );
 
-        const result = await verifyResponse.json();
 
-        if (result.success) {
-            alert("Payment successful and verified! ✅");
+        const order = await response.json();
 
-            // After payment verification, open WhatsApp order
-            checkout();
 
-        } else {
-            alert("Payment verification failed.");
+        if (!response.ok) {
+
+            throw new Error(
+                order.error ||
+                "Unable to create payment order"
+            );
         }
 
-    } catch (error) {
-        console.error(error);
-        alert("Payment verification failed.");
-    }
-},
+
+        // RAZORPAY CHECKOUT
+        const options = {
+
+            key: "rzp_live_TcLxFzDGHkbDsF",
+
+            amount: order.amount,
+
+            currency: "INR",
+
+            name: "MB Brothers Fruits Shop",
+
+            description: "Fruit Order",
+
+            order_id: order.id,
+
+
+            handler: async function (payment) {
+
+                try {
+
+                    // VERIFY PAYMENT
+                    const verifyResponse =
+                        await fetch(
+                            "https://mb-brothers-fruits-shop.onrender.com/verify-payment",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+
+                                    razorpay_order_id:
+                                        payment.razorpay_order_id,
+
+                                    razorpay_payment_id:
+                                        payment.razorpay_payment_id,
+
+                                    razorpay_signature:
+                                        payment.razorpay_signature
+                                })
+                            }
+                        );
+
+
+                    const result =
+                        await verifyResponse.json();
+
+
+                    if (result.success) {
+
+                        alert(
+                            "Payment successful and verified! ✅"
+                        );
+
+                        // OPEN WHATSAPP ORDER
+                        checkout();
+
+                    } else {
+
+                        alert(
+                            "Payment verification failed."
+                        );
+                    }
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        "Payment verification failed."
+                    );
+                }
+            },
+
+
+            modal: {
+
+                ondismiss: function () {
+
+                    console.log(
+                        "Payment window closed."
+                    );
+                }
+            },
+
+
             theme: {
+
                 color: "#2e7d32"
             }
         };
 
-        const razorpay = new Razorpay(options);
+
+        const razorpay =
+            new Razorpay(options);
+
+
         razorpay.open();
 
+
     } catch (error) {
+
         console.error(error);
-        alert("Payment could not be started.");
+
+        alert(
+            "Payment could not be started."
+        );
     }
 }
-
