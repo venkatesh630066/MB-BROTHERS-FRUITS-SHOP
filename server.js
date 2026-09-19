@@ -1,6 +1,7 @@
 const express = require("express");
 const Razorpay = require("razorpay");
 const cors = require("cors");
+const crypto = require("crypto");
 require("dotenv").config();
 
 const app = express();
@@ -13,6 +14,7 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
+// Create Razorpay Order
 app.post("/create-order", async (req, res) => {
     try {
         const { amount } = req.body;
@@ -32,10 +34,46 @@ app.post("/create-order", async (req, res) => {
         res.json(order);
 
     } catch (error) {
-        console.error(error);
+        console.error("Create Order Error:", error);
 
         res.status(500).json({
             error: "Unable to create payment order"
+        });
+    }
+});
+
+// Verify Razorpay Payment
+app.post("/verify-payment", (req, res) => {
+    try {
+        const {
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature
+        } = req.body;
+
+        const generated_signature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(razorpay_order_id + "|" + razorpay_payment_id)
+            .digest("hex");
+
+        if (generated_signature === razorpay_signature) {
+            return res.json({
+                success: true,
+                message: "Payment verified successfully"
+            });
+        }
+
+        res.status(400).json({
+            success: false,
+            message: "Payment verification failed"
+        });
+
+    } catch (error) {
+        console.error("Verification Error:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Verification error"
         });
     }
 });
